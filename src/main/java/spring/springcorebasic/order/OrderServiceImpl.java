@@ -1,5 +1,6 @@
 package spring.springcorebasic.order;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import spring.springcorebasic.discount.DiscountPolicy;
@@ -9,21 +10,12 @@ import spring.springcorebasic.member.MemberRepository;
 import spring.springcorebasic.member.MemoryMemberRepository;
 
 @Component
+@RequiredArgsConstructor
+// lombok 어노테이션으로 의존성을 주입하는 생성자 작성을 생략함 (컴파일 시점에 같은 내용으로 작성해서 포함시켜줌)
 public class OrderServiceImpl implements OrderService {
 
     private final MemberRepository memberRepository;
     private final DiscountPolicy discountPolicy;
-
-    /*
-    생성자에 @Autowired를 붙여주면 스프링 컨테이너가 등록되어 있는 Bean들 중에서 필요한 의존 클래스를 찾아 주입해줌
-    이 때 제시된 타입을 기준으로 찾는데, 아래에서는 MemberRepository 타입과 DiscountPolicy 타입에 해당하는 클래스를 각각 찾음
-     */
-
-    @Autowired
-    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
-        this.memberRepository = memberRepository;
-        this.discountPolicy = discountPolicy;
-    }
 
     @Override
     public Order createOrder(Long memberId, String itemName, int itemPrice) {
