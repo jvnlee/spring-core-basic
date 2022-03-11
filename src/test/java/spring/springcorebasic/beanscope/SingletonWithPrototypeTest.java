@@ -7,6 +7,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Scope;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Provider;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -29,22 +30,18 @@ public class SingletonWithPrototypeTest {
     @Scope("singleton")
     static class SingletonBean {
         /*
-        만약 생으로 PrototypeBean을 의존성으로 주입받게 되면, 주입 시점에 생성된 PrototypeBean을 가지고 계속 사용하게 됨
-        이는 prototype scope의 취지에도 맞지 않는데, 만약 SingletonBean 내부에서 사용할 PrototypeBean을 요청할 때마다 새로 생성시켜
-        주입받으려고 한다면 ObjectProvider를 사용하면 됨. (ObjectProvider는 스프링이 제공하는 기본 Bean 중에 하나)
+        ObjectProvider는 스프링이 제공하고 있기 때문에, 사용 시 코드가 스프링에 의존적이게 된다는 단점을 가짐.
+        반면, javax.inject.Provider는 자바 표준, 즉 순수 자바 기능이므로 스프링 외의 다른 컨테이너서도 사용 가능하고, 단위 테스트나 mock 코드 작성에 유리함
         */
-        private ObjectProvider<PrototypeBean> prototypeBeanProvider;
+        private Provider<PrototypeBean> prototypeBeanProvider;
 
-        public SingletonBean(ObjectProvider<PrototypeBean> prototypeBeanProvider) {
+        public SingletonBean(Provider<PrototypeBean> prototypeBeanProvider) {
             this.prototypeBeanProvider = prototypeBeanProvider;
         }
 
         public int logic() {
-            /*
-            getObject()가 스프링 컨테이너에 PrototypeBean를 하나 달라고 요청하는 역할 (새로 생성된 Bean을 받을 수 있음)
-            이렇게 필요한 의존성을 직접 구해오도록 설정하는 것을 Dependency Lookup 이라고 함.
-            */
-            PrototypeBean prototypeBean = prototypeBeanProvider.getObject();
+            // javax.inject.Provider는 ObjectProvider의 getObject()와 같은 기능으로 get()을 제공함 (DL 용도)
+            PrototypeBean prototypeBean = prototypeBeanProvider.get();
             prototypeBean.incrementCount();
             return prototypeBean.getCount();
         }
